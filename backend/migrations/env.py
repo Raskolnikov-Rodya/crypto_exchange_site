@@ -59,7 +59,7 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def run_migrations_online() -> None:
+def run_migrations_online():
     """Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine
@@ -81,7 +81,7 @@ def run_migrations_online() -> None:
             context.run_migrations()
 
 
-if context.is_offline_mode():
-    run_migrations_offline()
-else:
-    run_migrations_online()
+#if context.is_offline_mode():
+    #run_migrations_offline()
+#else:
+    #run_migrations_online()

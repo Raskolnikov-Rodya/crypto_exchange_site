@@ -1,15 +1,24 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
-from sqlalchemy.sql import func
-from app.db.base import Base
+# backend/app/models/user.py
+
+from datetime import datetime
+from enum import Enum as PyEnum
+from sqlalchemy import Column, Integer, String, DateTime, Enum
+from sqlalchemy.orm import declarative_base
+
+Base = declarative_base()  # All models inherit from this
+
+class Role(str, PyEnum):
+    USER = "user"
+    ADMIN = "admin"
 
 class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    is_active = Column(Boolean, default=True)
-    is_admin = Column(Boolean, default=False)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
- 
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    role = Column(Enum(Role), default=Role.USER, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    def __repr__(self):
+        return f"<User(email='{self.email}', role='{self.role}')>"
