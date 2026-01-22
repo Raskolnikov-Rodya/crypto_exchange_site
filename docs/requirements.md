@@ -7,3 +7,5 @@ sqlalchemy[asyncio]==2.0.35
 asyncpg==0.29.0
 pydantic==2.9.2
 alembic==1.13.3
+pytz
+psycopg2-binary
