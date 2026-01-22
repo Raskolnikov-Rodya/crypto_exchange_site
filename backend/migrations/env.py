@@ -33,6 +33,7 @@ config.set_main_option("sqlalchemy.url", sync_db_url)
 from app.models.base import Base
 from app.models.user import User
 from app.models.balance import Balance
+from app.models.transaction import Transaction
 
 target_metadata = Base.metadata
 

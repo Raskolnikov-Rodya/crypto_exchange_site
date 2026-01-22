@@ -30,6 +30,8 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(pytz.UTC), nullable=False)
     
     balances = relationship("Balance", back_populates="user")
-
+    # In user.py, add (optional):
+    transactions = relationship("Transaction", back_populates="user")
+    
     def __repr__(self):
          return f"<user(email='{self.email}', role='{self.role}')>"
