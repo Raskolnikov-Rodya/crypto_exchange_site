@@ -25,7 +25,7 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     role = Column(Enum(Role), default="user", nullable=False)
-    is_active = Column(Boolean, default=True, nullable=False)
+    #is_active = Column(Boolean, default=True, nullable=False)
     # Fixed: timezone-aware UTC default
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(pytz.UTC), nullable=False)
     
