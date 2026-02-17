@@ -1,60 +1,39 @@
 from logging.config import fileConfig
-
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+import os
+import sys
 
 from alembic import context
+from dotenv import load_dotenv
+from sqlalchemy import engine_from_config, pool
 
-# IMPORTANT: Add project root to sys.path FIRST
-import sys
-import os
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
 
-# this is the Alembic Config object
 config = context.config
 
-# Load .env file (same as in main.py)
-from dotenv import load_dotenv
 load_dotenv()
-
-# Override sqlalchemy.url with real value from .env
 db_url = os.getenv("DATABASE_URL")
-if db_url:
-    config.set_main_option("sqlalchemy.url", db_url)
-else:
+if not db_url:
     raise ValueError("DATABASE_URL not found in .env")
 
-# Override to sync driver for Alembic (replace +asyncpg with +psycopg2)
 sync_db_url = db_url.replace("+asyncpg", "+psycopg2")
 config.set_main_option("sqlalchemy.url", sync_db_url)
 
-# Then continue with imports
-from app.models.base import Base
-from app.models.user import User
-from app.models.balance import Balance
-from app.models.transaction import Transaction
+from App.models import Base  # noqa: E402
+from App.models.balance import Balance  # noqa: F401,E402
+from App.models.order import Order  # noqa: F401,E402
+from App.models.queue import WithdrawalQueue  # noqa: F401,E402
+from App.models.transaction import Transaction  # noqa: F401,E402
+from App.models.user import User  # noqa: F401,E402
+from App.models.wallet import Wallet  # noqa: F401,E402
 
 target_metadata = Base.metadata
 
-# Debug print (keep or comment)
-print("DEBUG Alembic env.py - Tables in target_metadata:")
-print(list(Base.metadata.tables.keys()))  # Safer version, avoids sorting crash
-
-# Interpret the config file for Python logging
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Set target metadata
-target_metadata = Base.metadata
 
-# Optional debug print (add this temporarily to confirm)
-print("DEBUG Alembic env.py - Tables in target_metadata:")
-for table in target_metadata.sorted_tables:
-    print(f"  - {table.name}")
-
-def run_migrations_offline():
-    """Run migrations in 'offline' mode."""
+def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
@@ -67,8 +46,7 @@ def run_migrations_offline():
         context.run_migrations()
 
 
-def run_migrations_online():
-    """Run migrations in 'online' mode."""
+def run_migrations_online() -> None:
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
@@ -88,7 +66,6 @@ def run_migrations_online():
             context.run_migrations()
 
 
-# Uncomment these — Alembic needs them to run
 if context.is_offline_mode():
     run_migrations_offline()
 else:
