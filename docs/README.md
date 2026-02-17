@@ -36,3 +36,6 @@ A simplified, centralized cryptocurrency exchange platform inspired by KuCoin, b
 **Status**: Planning → Documentation → Setup
 
 See /docs/ for detailed specs.
+
+## Additional Planning
+- Codebase audit and execution roadmap: `docs/codebase_audit.md`
