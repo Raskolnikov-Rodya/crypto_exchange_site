@@ -5,6 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from App.database import get_db
 from App.dependencies import require_admin
+from App.models.user import User
+from App.schemas.user import UserOut
 from App.models.user import Role, User
 
 router = APIRouter()
