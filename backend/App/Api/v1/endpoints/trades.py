@@ -1,59 +1,57 @@
+from decimal import Decimal
+
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from app.db.session import get_db
-from app.models.trade import Trade
-from app.models.user import User
-from app.api.v1.endpoints.auth import get_current_user
-from app.core.logger import log_action
-from app.api.v1.endpoints.monitor import notify_clients  # Import WebSocket notification
+
+from App.Api.v1.endpoints.auth import get_current_user
+from App.database import get_db
+from App.models.order import Order
+from App.models.user import User
 
 router = APIRouter()
 
+
+class PlaceOrderRequest(BaseModel):
+    side: str = Field(pattern="^(buy|sell)$")
+    symbol: str
+    price: Decimal
+    amount: Decimal
+
+
 @router.post("/")
-async def place_trade(
-    trade_type: str, 
-    symbol: str, 
-    amount: float, 
-    price: float, 
-    db: AsyncSession = Depends(get_db), 
-    user: User = Depends(get_current_user)
-):
-    """Handles trade execution (buy/sell orders)."""
-    if trade_type.lower() not in ["buy", "sell"]:
-        raise HTTPException(status_code=400, detail="Invalid trade type")
+async def place_order(payload: PlaceOrderRequest, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
+    if payload.price <= 0 or payload.amount <= 0:
+        raise HTTPException(status_code=400, detail="Price and amount must be greater than zero")
 
-    new_trade = Trade(
-        user_id=user.id, 
-        trade_type=trade_type.lower(), 
-        symbol=symbol.upper(), 
-        amount=amount, 
-        price=price
+    order = Order(
+        user_id=user.id,
+        side=payload.side,
+        symbol=payload.symbol.upper(),
+        price=payload.price,
+        amount=payload.amount,
     )
-    db.add(new_trade)
+    db.add(order)
     await db.commit()
+    await db.refresh(order)
 
-    log_action("Trade Executed", user.id, {"trade_id": new_trade.id, "symbol": symbol, "amount": amount, "price": price})
-
-    # Notify WebSocket clients about the new trade
-    await notify_clients({
-        "type": "trade",
-        "trade_id": new_trade.id,
-        "user_id": user.id,
-        "symbol": symbol,
-        "amount": amount,
-        "price": price
-    })
-    
-    return {"message": "Trade placed successfully", "trade_id": new_trade.id}
+    return {"message": "Order created", "order_id": order.id}
 
 
 @router.get("/")
-async def get_trade_history(
-    db: AsyncSession = Depends(get_db), 
-    user: User = Depends(get_current_user)
-):
-    """Fetches a user's trade history."""
-    result = await db.execute(select(Trade).where(Trade.user_id == user.id))
-    trades = result.scalars().all()
-    return trades
+async def get_trade_history(db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
+    result = await db.execute(select(Order).where(Order.user_id == user.id).order_by(Order.created_at.desc()))
+    orders = result.scalars().all()
+    return [
+        {
+            "id": order.id,
+            "side": order.side,
+            "symbol": order.symbol,
+            "price": str(order.price),
+            "amount": str(order.amount),
+            "status": order.status,
+            "created_at": order.created_at.isoformat(),
+        }
+        for order in orders
+    ]

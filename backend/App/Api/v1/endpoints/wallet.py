@@ -1,65 +1,63 @@
+from decimal import Decimal
+
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from app.db.session import get_db
-from app.models.wallet import Wallet
-from app.models.user import User
-from app.api.v1.endpoints.auth import get_current_user
+
+from App.Api.v1.endpoints.auth import get_current_user
+from App.database import get_db
+from App.models.balance import Balance
+from App.models.transaction import Transaction
+from App.models.user import User
 
 router = APIRouter()
 
-@router.get("/")
-async def get_wallet_balances(
-    db: AsyncSession = Depends(get_db), 
-    user: User = Depends(get_current_user)
-):
-    result = await db.execute(select(Wallet).where(Wallet.user_id == user.id))
-    wallets = result.scalars().all()
-    return wallets
+
+class AmountRequest(BaseModel):
+    coin: str
+    amount: Decimal
+
+
+@router.get("/balances")
+async def get_wallet_balances(db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
+    result = await db.execute(select(Balance).where(Balance.user_id == user.id).order_by(Balance.coin.asc()))
+    balances = result.scalars().all()
+    return [{"coin": b.coin, "amount": str(b.amount)} for b in balances]
+
 
 @router.post("/deposit")
-async def deposit_funds(
-    currency: str, 
-    amount: float, 
-    db: AsyncSession = Depends(get_db), 
-    user: User = Depends(get_current_user)
-):
-    if amount <= 0:
+async def deposit_funds(payload: AmountRequest, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
+    if payload.amount <= 0:
         raise HTTPException(status_code=400, detail="Deposit amount must be greater than zero")
 
-    result = await db.execute(select(Wallet).where(Wallet.user_id == user.id, Wallet.currency == currency.upper()))
-    wallet = result.scalars().first()
+    result = await db.execute(select(Balance).where(Balance.user_id == user.id, Balance.coin == payload.coin.upper()))
+    balance = result.scalar_one_or_none()
 
-    if wallet:
-        wallet.balance += amount
-    else:
-        wallet = Wallet(user_id=user.id, currency=currency.upper(), balance=amount)
-        db.add(wallet)
+    if balance is None:
+        balance = Balance(user_id=user.id, coin=payload.coin.upper(), amount=0)
+        db.add(balance)
 
+    balance.amount = balance.amount + payload.amount
+    db.add(Transaction(user_id=user.id, coin=payload.coin.upper(), amount=payload.amount, type="deposit", status="completed"))
     await db.commit()
-    return {"message": "Deposit successful", "new_balance": wallet.balance}
- 
+
+    return {"message": "Deposit recorded", "coin": payload.coin.upper(), "new_balance": str(balance.amount)}
+
+
 @router.post("/withdraw")
-async def withdraw_funds(
-    currency: str, 
-    amount: float, 
-    db: AsyncSession = Depends(get_db), 
-    user: User = Depends(get_current_user)
-):
-    if amount <= 0:
+async def withdraw_funds(payload: AmountRequest, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
+    if payload.amount <= 0:
         raise HTTPException(status_code=400, detail="Withdrawal amount must be greater than zero")
 
-    # Get user's wallet balance
-    result = await db.execute(select(Wallet).where(Wallet.user_id == user.id, Wallet.currency == currency.upper()))
-    wallet = result.scalars().first()
+    result = await db.execute(select(Balance).where(Balance.user_id == user.id, Balance.coin == payload.coin.upper()))
+    balance = result.scalar_one_or_none()
 
-    if not wallet or wallet.balance < amount:
-        log_action("Failed Withdrawal", user.id, {"currency": currency, "amount": amount})
+    if balance is None or balance.amount < payload.amount:
         raise HTTPException(status_code=400, detail="Insufficient funds")
 
-    wallet.balance -= amount
+    balance.amount = balance.amount - payload.amount
+    db.add(Transaction(user_id=user.id, coin=payload.coin.upper(), amount=payload.amount, type="withdrawal", status="pending"))
     await db.commit()
 
-    log_action("Withdrawal Processed", user.id, {"currency": currency, "amount": amount})
-    
-    return {"message": "Withdrawal successful", "remaining_balance": wallet.balance}
+    return {"message": "Withdrawal queued", "coin": payload.coin.upper(), "remaining_balance": str(balance.amount)}

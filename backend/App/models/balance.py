@@ -1,14 +1,16 @@
-from sqlalchemy import Column, Integer, String, Numeric, ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer, Numeric, String, UniqueConstraint
 from sqlalchemy.orm import relationship
+
 from .base import Base
-from .user import User  # ← Explicit import here
+
 
 class Balance(Base):
     __tablename__ = "balances"
+    __table_args__ = (UniqueConstraint("user_id", "coin", name="uq_balances_user_coin"),)
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey(User.id), nullable=False, index=True)  # ← Use User.id (class ref)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     coin = Column(String(10), nullable=False, index=True)
-    amount = Column(Numeric(precision=36, scale=18), default=0.0, nullable=False)
+    amount = Column(Numeric(precision=36, scale=18), default=0, nullable=False)
 
     user = relationship("User", back_populates="balances")
