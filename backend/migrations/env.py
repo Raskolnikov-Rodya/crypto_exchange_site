@@ -16,7 +16,7 @@ db_url = os.getenv("DATABASE_URL")
 if not db_url:
     raise ValueError("DATABASE_URL not found in .env")
 
-sync_db_url = db_url.replace("+asyncpg", "+psycopg2")
+sync_db_url = db_url.replace("+asyncpg", "+psycopg")
 config.set_main_option("sqlalchemy.url", sync_db_url)
 
 from App.models import Base  # noqa: E402
