@@ -9,10 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from App.database import get_db
 from App.dependencies import require_admin
 from App.models.balance import Balance
-from App.models.queue import WithdrawalQueue
 from App.models.transaction import Transaction
 from App.models.user import User
-from App.schemas.queue import WithdrawalCompleteIn, WithdrawalQueueOut, WithdrawalReviewIn
 
 router = APIRouter()
 
@@ -38,6 +36,7 @@ async def get_all_transactions(db: AsyncSession = Depends(get_db), current_user:
         }
         for tx in txs
     ]
+    return [{"id": tx.id, "user_id": tx.user_id, "coin": tx.coin, "amount": str(tx.amount), "type": tx.type, "status": tx.status} for tx in txs]
 
 
 @router.post("/credit")
@@ -49,6 +48,7 @@ async def manual_credit(payload: CreditRequest, db: AsyncSession = Depends(get_d
     balance = result.scalar_one_or_none()
     if balance is None:
         balance = Balance(user_id=payload.user_id, coin=payload.coin.upper(), amount=Decimal("0"))
+        balance = Balance(user_id=payload.user_id, coin=payload.coin.upper(), amount=0)
         db.add(balance)
 
     balance.amount = balance.amount + payload.amount
@@ -181,3 +181,5 @@ async def complete_withdrawal(
     await db.commit()
     await db.refresh(item)
     return item
+    await db.commit()
+    return {"message": "Balance credited"}
