@@ -41,3 +41,4 @@ See /docs/ for detailed specs.
 - Codebase audit and execution roadmap: `docs/codebase_audit.md`
 - Progress report: `docs/progress_report.md`
 - Phase 4 runbook/checklist: `docs/phase4_runbook.md`
+- Local setup and run guide: `docs/local_setup_and_run.md`
