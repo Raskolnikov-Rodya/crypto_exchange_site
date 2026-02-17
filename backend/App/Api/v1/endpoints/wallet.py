@@ -49,6 +49,7 @@ async def deposit_funds(payload: AmountRequest, db: AsyncSession = Depends(get_d
     balance = result.scalar_one_or_none()
 
     if balance is None:
+        balance = Balance(user_id=user.id, coin=payload.coin.upper(), amount=Decimal("0"))
         balance = Balance(user_id=user.id, coin=payload.coin.upper(), amount=0)
         db.add(balance)
 
