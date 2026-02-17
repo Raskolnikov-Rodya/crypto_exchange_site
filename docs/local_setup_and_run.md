@@ -83,3 +83,27 @@ pip install -r backend/requirements.txt
 ```
 
 Also prefer Python 3.10–3.12 for the smoothest package wheel compatibility.
+
+
+## Troubleshooting: `pydantic-core` metadata generation / Rust error
+
+If installation fails with messages about `pydantic-core` and Rust/Cargo while using Python 3.14,
+it usually means pip could not find a compatible prebuilt wheel for your pinned package version.
+
+This repo now pins newer FastAPI/Pydantic versions to improve wheel availability on modern Python.
+
+Try this sequence:
+
+```powershell
+python -m pip install --upgrade pip setuptools wheel
+pip uninstall -y pydantic pydantic-core pydantic-settings
+pip install -r backend/requirements.txt
+```
+
+If it still tries to compile Rust extensions, use Python 3.12 in your virtualenv for now:
+
+```powershell
+py -3.12 -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r backend/requirements.txt
+```
