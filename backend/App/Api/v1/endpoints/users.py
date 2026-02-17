@@ -12,6 +12,7 @@ from App.models.user import Role, User
 router = APIRouter()
 
 
+@router.get("/", response_model=list[UserOut])
 class UserPublic(BaseModel):
     id: int
     email: str

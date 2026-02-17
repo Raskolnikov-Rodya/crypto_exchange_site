@@ -59,6 +59,12 @@ async def deposit_funds(payload: AmountRequest, db: AsyncSession = Depends(get_d
     return {"message": "Deposit recorded", "coin": payload.coin.upper(), "new_balance": str(balance.amount)}
 
 
+@router.post("/withdraw/request", response_model=WithdrawalQueueOut)
+async def request_withdrawal(
+    payload: WithdrawalRequestIn,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
 @router.post("/withdraw")
 async def withdraw_funds(payload: AmountRequest, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
     if payload.amount <= 0:
@@ -71,6 +77,17 @@ async def withdraw_funds(payload: AmountRequest, db: AsyncSession = Depends(get_
         raise HTTPException(status_code=400, detail="Insufficient funds")
 
     balance.amount = balance.amount - payload.amount
+
+    queue_item = WithdrawalQueue(
+        user_id=user.id,
+        coin=payload.coin.upper(),
+        amount=payload.amount,
+        destination_address=payload.destination_address,
+        status="pending",
+    )
+    db.add(queue_item)
+    db.add(Transaction(user_id=user.id, coin=payload.coin.upper(), amount=payload.amount, type="withdrawal", status="pending"))
+
     db.add(Transaction(user_id=user.id, coin=payload.coin.upper(), amount=payload.amount, type="withdrawal", status="pending"))
     await db.commit()
     await db.refresh(queue_item)
