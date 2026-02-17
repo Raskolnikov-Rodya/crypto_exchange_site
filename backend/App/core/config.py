@@ -1,28 +1,36 @@
-from pydantic_settings import BaseSettings
 from typing import List
-import os
+
+from pydantic import model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Crypto Exchange"
     PROJECT_VERSION: str = "1.0.0"
+    ENV: str = "development"
 
-    # CORS
     ALLOWED_ORIGINS: List[str] = ["http://localhost:3000"]
 
-    # Database
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://user:password@localhost/dbname")
+    DATABASE_URL: str = "postgresql+asyncpg://user:password@localhost/dbname"
 
-    # Security
-    JWT_SECRET: str = os.getenv("JWT_SECRET", "your-secret-key")
+    JWT_SECRET: str = "your-secret-key"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
-    # Crypto API Settings
-    SUPPORTED_CURRENCIES: List[str] = ["BTC", "ETH", "USDT", "LTC"]
-    PRICE_UPDATE_INTERVAL: int = 30  # seconds
+    AUTH_LOGIN_RATE_LIMIT: int = 20
+    AUTH_REGISTER_RATE_LIMIT: int = 10
+    AUTH_RATE_LIMIT_WINDOW_SECONDS: int = 60
 
-    class Config:
-        env_file = ".env"
+    SUPPORTED_CURRENCIES: List[str] = ["BTC", "ETH", "USDT", "LTC", "BCH"]
+    PRICE_UPDATE_INTERVAL: int = 30
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    @model_validator(mode="after")
+    def validate_secrets(self):
+        if self.ENV.lower() == "production" and (self.JWT_SECRET == "your-secret-key" or len(self.JWT_SECRET) < 32):
+            raise ValueError("JWT_SECRET must be set to a strong value in production (min 32 chars).")
+        return self
+
 
 settings = Settings()
- 
