@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from App.database import get_db
+from App.core.logger import log_action
 from App.dependencies import require_admin
 from App.models.balance import Balance
 from App.models.queue import WithdrawalQueue
@@ -58,6 +59,7 @@ async def manual_credit(payload: CreditRequest, db: AsyncSession = Depends(get_d
     db.add(tx)
 
     await db.commit()
+    log_action("admin_manual_credit", current_user.id, {"target_user_id": payload.user_id, "coin": payload.coin.upper(), "amount": str(payload.amount)})
     return {"message": "Balance credited"}
 
 
@@ -100,6 +102,7 @@ async def approve_withdrawal(
         tx.status = "approved"
 
     await db.commit()
+    log_action("admin_withdrawal_approved", current_user.id, {"withdrawal_id": item.id, "user_id": item.user_id, "coin": item.coin, "amount": str(item.amount), "note": item.note})
     await db.refresh(item)
     return item
 
@@ -144,6 +147,7 @@ async def reject_withdrawal(
         tx.status = "rejected"
 
     await db.commit()
+    log_action("admin_withdrawal_rejected", current_user.id, {"withdrawal_id": item.id, "user_id": item.user_id, "coin": item.coin, "amount": str(item.amount), "note": item.note})
     await db.refresh(item)
     return item
 
@@ -180,6 +184,10 @@ async def complete_withdrawal(
     if tx:
         tx.status = "completed"
 
+    await db.commit()
+    log_action("admin_withdrawal_completed", current_user.id, {"withdrawal_id": item.id, "user_id": item.user_id, "coin": item.coin, "amount": str(item.amount), "tx_hash": item.tx_hash})
+    await db.refresh(item)
+    return item
     await db.commit()
     await db.refresh(item)
     return item
