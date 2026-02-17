@@ -1,7 +1,6 @@
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,15 +13,8 @@ from App.models.user import User
 from pydantic import BaseModel
 
 from App.schemas.queue import WithdrawalQueueOut, WithdrawalRequestIn
-from App.models.transaction import Transaction
-from App.models.user import User
 
 router = APIRouter()
-
-
-class AmountRequest(BaseModel):
-    coin: str
-    amount: Decimal
 
 
 @router.get("/balances")
@@ -39,9 +31,6 @@ class DepositRequest(BaseModel):
 
 @router.post("/deposit")
 async def deposit_funds(payload: DepositRequest, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
-
-@router.post("/deposit")
-async def deposit_funds(payload: AmountRequest, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
     if payload.amount <= 0:
         raise HTTPException(status_code=400, detail="Deposit amount must be greater than zero")
 
@@ -50,7 +39,6 @@ async def deposit_funds(payload: AmountRequest, db: AsyncSession = Depends(get_d
 
     if balance is None:
         balance = Balance(user_id=user.id, coin=payload.coin.upper(), amount=Decimal("0"))
-        balance = Balance(user_id=user.id, coin=payload.coin.upper(), amount=0)
         db.add(balance)
 
     balance.amount = balance.amount + payload.amount
@@ -66,14 +54,11 @@ async def request_withdrawal(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-@router.post("/withdraw")
-async def withdraw_funds(payload: AmountRequest, db: AsyncSession = Depends(get_db), user: User = Depends(get_current_user)):
     if payload.amount <= 0:
         raise HTTPException(status_code=400, detail="Withdrawal amount must be greater than zero")
 
     result = await db.execute(select(Balance).where(Balance.user_id == user.id, Balance.coin == payload.coin.upper()))
     balance = result.scalar_one_or_none()
-
     if balance is None or balance.amount < payload.amount:
         raise HTTPException(status_code=400, detail="Insufficient funds")
 
@@ -89,7 +74,6 @@ async def withdraw_funds(payload: AmountRequest, db: AsyncSession = Depends(get_
     db.add(queue_item)
     db.add(Transaction(user_id=user.id, coin=payload.coin.upper(), amount=payload.amount, type="withdrawal", status="pending"))
 
-    db.add(Transaction(user_id=user.id, coin=payload.coin.upper(), amount=payload.amount, type="withdrawal", status="pending"))
     await db.commit()
     await db.refresh(queue_item)
     return queue_item
@@ -101,4 +85,3 @@ async def list_my_withdrawal_requests(db: AsyncSession = Depends(get_db), user: 
         select(WithdrawalQueue).where(WithdrawalQueue.user_id == user.id).order_by(WithdrawalQueue.created_at.desc())
     )
     return list(result.scalars().all())
-    return {"message": "Withdrawal queued", "coin": payload.coin.upper(), "remaining_balance": str(balance.amount)}

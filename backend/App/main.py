@@ -1,7 +1,6 @@
 import os
 
 from fastapi import Depends, FastAPI, Request
-from fastapi import Depends, FastAPI
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,7 +8,6 @@ from App.Api.v1.endpoints import admin, auth, blockchain, monitor, prices, trade
 from App.core.config import settings
 from App.database import get_db
 from App.middleware.rate_limiter import AuthRateLimiter, LimitWindow
-from App.database import get_db
 
 app = FastAPI(
     title="Crypto Exchange API",

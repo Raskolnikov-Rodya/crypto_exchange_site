@@ -53,6 +53,12 @@ The project has moved from planning/scaffold into a working MVP baseline across 
 - Verified no conflict markers in critical backend/docs files.
 - Verified no legacy `app.*` import paths remain in backend runtime modules.
 
+
+## Dependency & Runtime Readiness Notes
+- Replaced remaining `loguru` usage in middleware with stdlib `logging` to align runtime dependencies.
+- Added `scripts/dependency_health_check.sh` for repeatable dependency/runtime validation (pip check, import checks, tests, frontend fetch check).
+- Frontend build now passes with Vite after normalizing JSX entry/component file extensions (`index.jsx`, `App.jsx`, `AuthContext.jsx`).
+
 ## Risks / Known Constraints
 - Current rate limiting is in-memory (single-instance). Multi-instance deployment should use Redis-backed limiting.
 - Matching execution is admin-triggered and intentionally simple (MVP mode).
