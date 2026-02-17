@@ -42,3 +42,4 @@ See /docs/ for detailed specs.
 - Progress report: `docs/progress_report.md`
 - Phase 4 runbook/checklist: `docs/phase4_runbook.md`
 - Local setup and run guide: `docs/local_setup_and_run.md`
+- Optional backend dependencies: `backend/requirements-optional.txt`
