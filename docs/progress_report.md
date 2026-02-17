@@ -47,6 +47,12 @@ The project has moved from planning/scaffold into a working MVP baseline across 
 - Backend app import and route registration now succeeds in the current environment.
 - Frontend package installation may still depend on external npm registry access policies in your environment.
 
+
+## Conflict Resolution Status
+- Verified no unresolved merge files in Git index (`git ls-files -u` empty).
+- Verified no conflict markers in critical backend/docs files.
+- Verified no legacy `app.*` import paths remain in backend runtime modules.
+
 ## Risks / Known Constraints
 - Current rate limiting is in-memory (single-instance). Multi-instance deployment should use Redis-backed limiting.
 - Matching execution is admin-triggered and intentionally simple (MVP mode).
