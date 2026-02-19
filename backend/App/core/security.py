@@ -8,7 +8,8 @@ from passlib.context import CryptContext
 
 from App.core.config import settings
 
-pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+# Keep backward compatibility with older bcrypt hashes while defaulting new hashes to pbkdf2.
+pwd_context = CryptContext(schemes=["pbkdf2_sha256", "bcrypt"], deprecated="auto")
 
 
 def get_password_hash(password: str) -> str:
@@ -16,7 +17,11 @@ def get_password_hash(password: str) -> str:
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        return pwd_context.verify(plain_password, hashed_password)
+    except (ValueError, TypeError):
+        # Gracefully fail verification for malformed/unsupported legacy hashes.
+        return False
 
 
 def validate_password_strength(password: str) -> None:

@@ -4,6 +4,13 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import BrandLogo from "../components/common/BrandLogo.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
 
+function formatApiError(err, fallback) {
+  const detail = err?.response?.data?.detail;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) return detail.map((d) => d.msg || String(d)).join("; ");
+  return fallback;
+}
+
 export default function Signup() {
   const { register, user, loading } = useAuth();
   const navigate = useNavigate();
@@ -19,7 +26,7 @@ export default function Signup() {
       await register(form.email, form.password, form.username || undefined, form.phone || undefined);
       navigate("/login", { replace: true });
     } catch (err) {
-      setError(err?.response?.data?.detail || "Sign up failed");
+      setError(formatApiError(err, "Sign up failed"));
     }
   };
 
@@ -34,6 +41,7 @@ export default function Signup() {
           <input className="input" placeholder="Username" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />
           <input className="input" placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           <input className="input" placeholder="Password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+          <p className="muted" style={{ margin: "2px 0 0", fontSize: 12 }}>Password must be 8-128 chars, include 1 uppercase letter and 1 number.</p>
           <button className="btn btn-success" type="submit">Create account</button>
           {error && <p className="error">{error}</p>}
         </form>

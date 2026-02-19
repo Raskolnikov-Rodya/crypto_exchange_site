@@ -4,6 +4,13 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import BrandLogo from "../components/common/BrandLogo.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
 
+function formatApiError(err, fallback) {
+  const detail = err?.response?.data?.detail;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) return detail.map((d) => d.msg || String(d)).join("; ");
+  return fallback;
+}
+
 export default function Login() {
   const { login, user, loading } = useAuth();
   const navigate = useNavigate();
@@ -19,7 +26,7 @@ export default function Login() {
       await login(form.email, form.password);
       navigate("/dashboard", { replace: true });
     } catch (err) {
-      setError(err?.response?.data?.detail || "Login failed");
+      setError(formatApiError(err, "Login failed"));
     }
   };
 
