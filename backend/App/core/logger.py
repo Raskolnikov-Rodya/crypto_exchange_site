@@ -1,24 +1,27 @@
-from loguru import logger
-import sys
+import logging
+import os
+from typing import Any
 
-logger.remove()
+LOG_DIR = "logs"
+os.makedirs(LOG_DIR, exist_ok=True)
 
-# Remove default logger
-logger.remove()
+logger = logging.getLogger("crypto_exchange")
+if not logger.handlers:
+    logger.setLevel(logging.INFO)
 
-# Configure logging
-logger.add(
-    sys.stdout, 
-    format="{time} {level} {message}", 
-    level="INFO"
-)
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.INFO)
 
-logger.add(
-    "logs/app.log", 
-    rotation="1 day",  # Creates a new log file every day
-    level="INFO"
-)
+    file_handler = logging.FileHandler(os.path.join(LOG_DIR, "app.log"))
+    file_handler.setLevel(logging.INFO)
 
-def log_action(action: str, user_id: int = None, details: dict = None):
-    """Logs important actions for tracking."""
-    logger.info(f"Action: {action}, User: {user_id}, Details: {details}")
+    fmt = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+    stream_handler.setFormatter(fmt)
+    file_handler.setFormatter(fmt)
+
+    logger.addHandler(stream_handler)
+    logger.addHandler(file_handler)
+
+
+def log_action(action: str, user_id: int | None = None, details: dict[str, Any] | None = None) -> None:
+    logger.info("Action=%s User=%s Details=%s", action, user_id, details)
