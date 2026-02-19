@@ -1,0 +1,178 @@
+# Local Setup & Run Guide
+
+If you see this error:
+
+```text
+ModuleNotFoundError: No module named 'fastapi'
+```
+
+it means Python dependencies are not installed in your active environment yet.
+
+## Important clarification
+
+- `fastapi`, `web3.py`, and similar libraries are **Python packages**, not project folders in this repo.
+- `CoreUI` is a frontend dependency/template ecosystem, not expected as a Python folder.
+- Empty local folders with those names are not required for this project to run.
+
+## Backend (Windows PowerShell)
+
+From repo root:
+
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r backend/requirements.txt
+cd backend
+python run_api.py
+```
+
+Backend should start at `http://localhost:8000`.
+
+## Backend (Linux/macOS)
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r backend/requirements.txt
+cd backend
+python run_api.py
+```
+
+## Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Frontend should start on Vite default port (usually `http://localhost:5173`).
+
+
+## Frontend opens to a blank white page
+
+If Vite starts but the page is blank, check these in order:
+
+1. Open browser DevTools Console for runtime errors (missing module, network, CORS).
+2. Confirm frontend deps are installed in `frontend/`:
+   - `npm install`
+3. Confirm backend is running:
+   - `cd backend && python run_api.py`
+4. Verify backend is reachable:
+   - `http://localhost:8000/health`
+   - `http://localhost:8000/docs`
+5. Ensure frontend points to the correct API base URL:
+   - default is `http://localhost:8000/api/v1`
+   - override with `.env` in `frontend/`:
+
+```bash
+VITE_API_URL=http://localhost:8000/api/v1
+```
+
+6. Hard-refresh the browser (Ctrl+F5) and clear stale localStorage token if needed.
+
+### Do I need API keys to see the app?
+
+- For core MVP pages (home, login, signup, dashboard shell), **no API keys are required**.
+- The `prices` API calls CoinGecko anonymously in current MVP mode; no key is required in this repo setup.
+- Blockchain broadcasting is intentionally disabled in MVP (`/api/v1/blockchain/status` returns a stub status).
+
+### Recommended URLs to test
+
+- Frontend app: `http://localhost:5173/`
+- Backend health: `http://localhost:8000/health`
+- Backend Swagger docs: `http://localhost:8000/docs`
+- API reference in repo: `docs/api_endpoints_reference.md`
+
+## What to test first
+
+1. Backend health: `GET http://localhost:8000/health`
+2. Auth register/login flow (`/api/v1/auth/register`, `/api/v1/auth/login`)
+3. Dashboard flow in frontend (login, balances, withdrawal request)
+4. Admin queue actions for withdrawals
+
+## Common mistakes
+
+- Running `python backend/App/main.py` directly (not recommended).
+- Using global Python without activating virtualenv.
+- Installing frontend dependencies but not backend dependencies (or vice versa).
+
+
+## Troubleshooting: `pg_config executable not found`
+
+If `pip install -r backend/requirements.txt` fails with:
+
+```text
+Error: pg_config executable not found
+```
+
+it means your environment is trying to compile an old psycopg2 dependency from source.
+This project now uses `psycopg[binary]` in requirements to avoid that build step.
+
+Try:
+
+```powershell
+pip install --upgrade pip setuptools wheel
+pip install -r backend/requirements.txt
+```
+
+Also prefer Python 3.10–3.12 for the smoothest package wheel compatibility.
+
+
+## Troubleshooting: `pydantic-core` metadata generation / Rust error
+
+If installation fails with messages about `pydantic-core` and Rust/Cargo while using Python 3.14,
+it usually means pip could not find a compatible prebuilt wheel for your pinned package version.
+
+This repo now pins newer FastAPI/Pydantic versions to improve wheel availability on modern Python.
+
+Try this sequence:
+
+```powershell
+python -m pip install --upgrade pip setuptools wheel
+pip uninstall -y pydantic pydantic-core pydantic-settings
+pip install -r backend/requirements.txt
+```
+
+If it still tries to compile Rust extensions, use Python 3.12 in your virtualenv for now:
+
+```powershell
+py -3.12 -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r backend/requirements.txt
+```
+
+
+## Optional packages (only if you need them now)
+
+Some optional integrations (not required for current MVP runtime) may require native build tools on Windows.
+Install them only when needed:
+
+```powershell
+pip install -r backend/requirements-optional.txt
+```
+
+Examples:
+- `web3` (blockchain integrations)
+- `ccxt` (exchange integrations)
+- `celery` + `redis` (background jobs)
+
+
+## Troubleshooting: `lru-dict` wheel build / MSVC error
+
+If you see:
+
+```text
+Microsoft Visual C++ 14.0 or greater is required
+```
+
+it is usually from optional dependencies (commonly `web3` transitive packages) requiring native wheels/build tools on your platform.
+
+Recommended path:
+1. Install only core requirements first (`backend/requirements.txt`).
+2. Run backend and verify MVP flows.
+3. Install optional requirements later only when you need those features.
+
+If you must install optional packages immediately, install Microsoft C++ Build Tools first.
