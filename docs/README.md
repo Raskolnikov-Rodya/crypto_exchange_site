@@ -43,3 +43,5 @@ See /docs/ for detailed specs.
 - Phase 4 runbook/checklist: `docs/phase4_runbook.md`
 - Local setup and run guide: `docs/local_setup_and_run.md`
 - Optional backend dependencies: `backend/requirements-optional.txt`
+
+- API endpoint map: `docs/api_endpoints_reference.md`

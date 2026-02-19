@@ -50,6 +50,42 @@ npm run dev
 
 Frontend should start on Vite default port (usually `http://localhost:5173`).
 
+
+## Frontend opens to a blank white page
+
+If Vite starts but the page is blank, check these in order:
+
+1. Open browser DevTools Console for runtime errors (missing module, network, CORS).
+2. Confirm frontend deps are installed in `frontend/`:
+   - `npm install`
+3. Confirm backend is running:
+   - `cd backend && python run_api.py`
+4. Verify backend is reachable:
+   - `http://localhost:8000/health`
+   - `http://localhost:8000/docs`
+5. Ensure frontend points to the correct API base URL:
+   - default is `http://localhost:8000/api/v1`
+   - override with `.env` in `frontend/`:
+
+```bash
+VITE_API_URL=http://localhost:8000/api/v1
+```
+
+6. Hard-refresh the browser (Ctrl+F5) and clear stale localStorage token if needed.
+
+### Do I need API keys to see the app?
+
+- For core MVP pages (home, login, signup, dashboard shell), **no API keys are required**.
+- The `prices` API calls CoinGecko anonymously in current MVP mode; no key is required in this repo setup.
+- Blockchain broadcasting is intentionally disabled in MVP (`/api/v1/blockchain/status` returns a stub status).
+
+### Recommended URLs to test
+
+- Frontend app: `http://localhost:5173/`
+- Backend health: `http://localhost:8000/health`
+- Backend Swagger docs: `http://localhost:8000/docs`
+- API reference in repo: `docs/api_endpoints_reference.md`
+
 ## What to test first
 
 1. Backend health: `GET http://localhost:8000/health`
