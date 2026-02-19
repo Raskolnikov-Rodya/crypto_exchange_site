@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { pricesApi } from "../services/api";
 
-const fallbackPrices = { BTC: "--", ETH: "--", LTC: "--", BCH: "--", USDT: "1.00" };
+const fallbackPrices = { BTC: "--", ETH: "--", LTC: "--", BCH: "--", USDT: "1.00", SOL: "--", XRP: "--", ADA: "--" };
 
 function asNumber(value) {
   const n = Number(value);
@@ -21,62 +21,79 @@ export default function Home() {
   useEffect(() => {
     pricesApi
       .all()
-      .then(({ data }) => setPrices(data || fallbackPrices))
+      .then(({ data }) => setPrices({ ...fallbackPrices, ...(data || {}) }))
       .catch(() => setPrices(fallbackPrices));
   }, []);
 
   const marketRows = useMemo(
     () => [
-      { pair: "BTC/USD", key: "BTC" },
-      { pair: "ETH/USD", key: "ETH" },
-      { pair: "LTC/USD", key: "LTC" },
-      { pair: "BCH/USD", key: "BCH" },
-      { pair: "USDT/USD", key: "USDT" },
+      { pair: "BTC/USD", key: "BTC", change: "+2.14%" },
+      { pair: "ETH/USD", key: "ETH", change: "+1.08%" },
+      { pair: "SOL/USD", key: "SOL", change: "+3.45%" },
+      { pair: "XRP/USD", key: "XRP", change: "-0.40%" },
+      { pair: "ADA/USD", key: "ADA", change: "+0.89%" },
+      { pair: "LTC/USD", key: "LTC", change: "-1.02%" },
+      { pair: "BCH/USD", key: "BCH", change: "+0.35%" },
+      { pair: "USDT/USD", key: "USDT", change: "0.00%" },
     ],
     [],
   );
 
   return (
     <main className="page home-page">
-      <div className="home-bg-orb home-bg-orb-a" aria-hidden="true" />
-      <div className="home-bg-orb home-bg-orb-b" aria-hidden="true" />
       <div className="home-bg-grid" aria-hidden="true" />
 
-      <section className="home-hero card">
-        <div>
-          <p className="hero-tag">Trusted crypto exchange infrastructure</p>
-          <h1>Trade digital assets with speed, confidence and secure account controls.</h1>
+      <section className="home-hero home-section card">
+        <div className="hero-copy-pane">
+          <p className="hero-tag">Pro Trading, For Everyone</p>
+          <h1>Trade spot, margin, futures & OTC on the best crypto trading platform.</h1>
           <p className="muted hero-copy">
-            H-E-R-M-A-R gives you modern market visibility, seamless onboarding, wallet operations, and role-based admin operations in one elegant platform.
+            Built for both first-time buyers and high-frequency traders with secure auth, modern execution surfaces, and wallet operations you can trust.
           </p>
           <div className="hero-actions">
             <Link className="btn btn-success" to="/signup">Create account</Link>
-            <Link className="btn btn-primary" to="/trade">Start trading</Link>
+            <Link className="btn btn-primary" to="/trade">Trade now</Link>
             <Link className="btn" to="/login">Sign in</Link>
           </div>
         </div>
-        <div className="hero-side-card card-sub">
-          <h3>Why traders choose H-E-R-M-A-R</h3>
-          <ul className="muted compact-list">
-            <li>Fast sign up and secure login</li>
-            <li>Live market pricing with clean dashboards</li>
-            <li>Wallet funding and withdrawal queue workflows</li>
-            <li>Admin controls for compliance-style review</li>
-          </ul>
+        <div className="hero-chart-pane" aria-hidden="true">
+          <div className="chart-mock card-sub">
+            <div className="chart-header">
+              <span>BTC/USDT</span>
+              <strong>${formatUsd(prices.BTC)}</strong>
+            </div>
+            <div className="chart-grid" />
+            <svg viewBox="0 0 400 150" className="chart-line" preserveAspectRatio="none">
+              <polyline
+                fill="none"
+                stroke="url(#lineGradient)"
+                strokeWidth="3"
+                points="0,120 38,112 76,118 114,98 152,102 190,84 228,86 266,74 304,68 342,44 380,56 400,42"
+              />
+              <defs>
+                <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#13d17f" />
+                  <stop offset="100%" stopColor="#1e9bff" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
         </div>
       </section>
 
-      <section className="market-section card">
+      <section className="market-section home-section card">
+        <p className="hero-tag">For beginners and pros</p>
         <div className="market-head">
-          <h2>Live Market Prices</h2>
-          <p className="muted">USD reference stream inspired by modern exchange ticker layouts.</p>
+          <h2>Buy, sell & manage over 100 crypto assets</h2>
+          <p className="muted">Live prices with exchange-style presentation and quick market scanning.</p>
         </div>
 
         <div className="ticker-row" role="presentation">
-          {marketRows.map((row) => (
-            <article className="ticker-tile" key={row.pair}>
+          {marketRows.slice(0, 4).map((row) => (
+            <article className="ticker-tile" key={`${row.pair}-tile`}>
               <span>{row.pair}</span>
               <strong>${formatUsd(prices[row.key])}</strong>
+              <em className={row.change.startsWith("-") ? "neg" : "pos"}>{row.change}</em>
             </article>
           ))}
         </div>
@@ -84,13 +101,14 @@ export default function Home() {
         <div className="market-table-wrap">
           <table>
             <thead>
-              <tr><th>Market</th><th>Price (USD)</th><th>Status</th></tr>
+              <tr><th>Market</th><th>Price (USD)</th><th>24h</th><th>Status</th></tr>
             </thead>
             <tbody>
               {marketRows.map((row) => (
                 <tr key={`${row.pair}-table`}>
                   <td>{row.pair}</td>
                   <td>${formatUsd(prices[row.key])}</td>
+                  <td className={row.change.startsWith("-") ? "neg" : "pos"}>{row.change}</td>
                   <td><span className="status-pill">Live</span></td>
                 </tr>
               ))}
@@ -99,19 +117,26 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="feature-grid home-feature-grid">
-        <article className="card">
-          <h3>Built for clarity</h3>
-          <p className="muted">Exchange-like layout, clear market hierarchy and faster decision making.</p>
-        </article>
-        <article className="card">
-          <h3>Account + wallet workflows</h3>
-          <p className="muted">Sign up, sign in, deposit and withdrawal controls are connected end-to-end.</p>
-        </article>
-        <article className="card">
-          <h3>Operator-ready tooling</h3>
-          <p className="muted">Admin bootstrap, CI checks and preflight scripts support safer releases.</p>
-        </article>
+      <section className="get-started home-section card">
+        <p className="hero-tag">Quickly start trading</p>
+        <h2>Get started in minutes</h2>
+        <div className="steps-grid">
+          <article className="step-card">
+            <span>01</span>
+            <h3>Create your account</h3>
+            <p className="muted">Sign up with your email, choose a strong password and verify your profile details.</p>
+          </article>
+          <article className="step-card">
+            <span>02</span>
+            <h3>Fund your wallet</h3>
+            <p className="muted">Deposit crypto and monitor wallet balances from your personal dashboard.</p>
+          </article>
+          <article className="step-card">
+            <span>03</span>
+            <h3>Start trading</h3>
+            <p className="muted">Place buy/sell orders and track prices with clean exchange-style market views.</p>
+          </article>
+        </div>
       </section>
     </main>
   );
