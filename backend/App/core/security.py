@@ -8,7 +8,7 @@ from passlib.context import CryptContext
 
 from App.core.config import settings
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 
 def get_password_hash(password: str) -> str:
@@ -22,6 +22,8 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def validate_password_strength(password: str) -> None:
     if len(password) < 8:
         raise HTTPException(status_code=400, detail="Password must be at least 8 characters long")
+    if len(password) > 128:
+        raise HTTPException(status_code=400, detail="Password must be at most 128 characters long")
     if not re.search(r"[A-Z]", password):
         raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter")
     if not re.search(r"\d", password):

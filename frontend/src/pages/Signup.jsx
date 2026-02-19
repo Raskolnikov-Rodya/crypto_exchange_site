@@ -1,6 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import BrandLogo from "../components/common/BrandLogo.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
 
 export default function Signup() {
@@ -21,15 +22,19 @@ export default function Signup() {
   };
 
   return (
-    <main style={{ padding: 24 }}>
-      <h2>Sign up</h2>
-      <form onSubmit={submit} style={{ display: "grid", gap: 12, maxWidth: 360 }}>
-        <input placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-        <input placeholder="Password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
-        <button type="submit">Create account</button>
-        {error && <p style={{ color: "crimson" }}>{error}</p>}
-      </form>
-      <p><Link to="/login">Back to login</Link></p>
+    <main className="auth-wrap">
+      <section className="card auth-card">
+        <BrandLogo withText={true} />
+        <h2>Create account</h2>
+        <p className="muted">Join H-E-R-M-A-R and start with wallet + trading flows.</p>
+        <form onSubmit={submit} className="form-grid">
+          <input className="input" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+          <input className="input" placeholder="Password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+          <button className="btn btn-success" type="submit">Create account</button>
+          {error && <p className="error">{error}</p>}
+        </form>
+        <p className="muted">Already registered? <Link to="/login">Sign in</Link></p>
+      </section>
     </main>
   );
 }
