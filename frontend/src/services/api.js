@@ -29,6 +29,9 @@ export const authApi = {
 
 export const usersApi = {
   list: () => api.get("/users/"),
+  me: () => api.get("/users/me"),
+  updateProfile: (payload) => api.patch("/users/me", payload),
+  updatePassword: (payload) => api.post("/users/me/password", payload),
 };
 
 export const walletApi = {
@@ -52,4 +55,8 @@ export const adminApi = {
   approveWithdrawal: (id, payload = {}) => api.post(`/admin/withdrawals/${id}/approve`, payload),
   rejectWithdrawal: (id, payload = {}) => api.post(`/admin/withdrawals/${id}/reject`, payload),
   completeWithdrawal: (id, payload = {}) => api.post(`/admin/withdrawals/${id}/complete`, payload),
+};
+
+export const pricesApi = {
+  all: () => api.get("/prices/"),
 };

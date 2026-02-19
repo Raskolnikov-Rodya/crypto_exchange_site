@@ -24,6 +24,7 @@ python -m venv venv
 python -m pip install --upgrade pip
 pip install -r backend/requirements.txt
 cd backend
+alembic upgrade head
 python run_api.py
 ```
 
@@ -37,6 +38,7 @@ source venv/bin/activate
 python -m pip install --upgrade pip
 pip install -r backend/requirements.txt
 cd backend
+alembic upgrade head
 python run_api.py
 ```
 

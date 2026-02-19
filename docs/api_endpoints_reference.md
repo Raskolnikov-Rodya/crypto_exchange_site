@@ -18,9 +18,12 @@ Useful non-versioned utility routes:
 - `POST /auth/login`
 - `GET /auth/me`
 
-## Users (admin)
+## Users
 
-- `GET /users/`
+- `GET /users/` (admin)
+- `GET /users/me`
+- `PATCH /users/me`
+- `POST /users/me/password`
 
 ## Wallet
 

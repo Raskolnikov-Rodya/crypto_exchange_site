@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from App.core.security import create_access_token, decode_access_token, get_password_hash, validate_password_strength, verify_password
@@ -27,11 +27,25 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 async def register_user(payload: RegisterRequest, db: AsyncSession = Depends(get_db)) -> User:
     validate_password_strength(payload.password)
-    existing = await db.execute(select(User).where(User.email == payload.email))
-    if existing.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="Email already exists")
 
-    user = User(email=payload.email, hashed_password=get_password_hash(payload.password), role=Role.USER)
+    clauses = [User.email == payload.email]
+    if payload.username:
+        clauses.append(User.username == payload.username)
+
+    existing = await db.execute(select(User).where(or_(*clauses)))
+    found = existing.scalar_one_or_none()
+    if found:
+        if found.email == payload.email:
+            raise HTTPException(status_code=400, detail="Email already exists")
+        raise HTTPException(status_code=400, detail="Username already exists")
+
+    user = User(
+        email=payload.email,
+        username=payload.username,
+        phone=payload.phone,
+        hashed_password=get_password_hash(payload.password),
+        role=Role.USER,
+    )
     db.add(user)
     await db.commit()
     await db.refresh(user)

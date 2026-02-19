@@ -1,21 +1,23 @@
 import React from "react";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import BrandLogo from "../components/common/BrandLogo.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, user, loading } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+
+  if (!loading && user) return <Navigate to="/dashboard" replace />;
 
   const submit = async (e) => {
     e.preventDefault();
     setError("");
     try {
       await login(form.email, form.password);
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       setError(err?.response?.data?.detail || "Login failed");
     }
