@@ -1,0 +1,205 @@
+:root {
+  --bg: #06090f;
+  --panel: #0f1623;
+  --panel-2: #151f30;
+  --text: #f5f8ff;
+  --muted: #a8b2c7;
+  --blue: #1e9bff;
+  --green: #13d17f;
+  --line: #273247;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: radial-gradient(1200px 500px at 20% -10%, #1a4f8e 0%, transparent 55%),
+    radial-gradient(700px 500px at 90% -10%, #15452f 0%, transparent 45%),
+    var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+a { color: var(--text); text-decoration: none; }
+
+.topnav {
+  height: 72px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  background: rgba(5, 10, 18, 0.85);
+  position: sticky;
+  top: 0;
+  backdrop-filter: blur(6px);
+  z-index: 5;
+}
+.nav-links, .nav-right { display: flex; gap: 12px; align-items: center; }
+.nav-pill { padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; }
+.nav-pill:hover { border-color: var(--blue); }
+
+.brand-logo-wrap { display:flex; align-items:center; gap:10px; }
+.brand-title { font-weight: 800; letter-spacing: 1px; }
+
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 20px 48px;
+}
+.hero { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; }
+.hero-banner { min-height: 280px; }
+.feature-grid { margin-top: 18px; display:grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.price-grid { display:grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+.price-item { border:1px solid var(--line); background:#091222; border-radius:10px; padding:10px 12px; display:flex; justify-content:space-between; }
+
+.home-page {
+  position: relative;
+  overflow: hidden;
+}
+.home-bg-orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(40px);
+  opacity: 0.32;
+  z-index: 0;
+}
+.home-bg-orb-a {
+  width: 360px;
+  height: 360px;
+  background: #1e9bff;
+  top: 80px;
+  right: -110px;
+}
+.home-bg-orb-b {
+  width: 320px;
+  height: 320px;
+  background: #13d17f;
+  left: -120px;
+  top: 320px;
+}
+.home-bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(37, 50, 71, 0.32) 1px, transparent 1px), linear-gradient(90deg, rgba(37, 50, 71, 0.32) 1px, transparent 1px);
+  background-size: 38px 38px;
+  mask-image: radial-gradient(circle at 30% 15%, black 20%, transparent 75%);
+  z-index: 0;
+}
+.home-page > * { position: relative; z-index: 1; }
+
+.home-hero {
+  display: grid;
+  grid-template-columns: 1.45fr 1fr;
+  gap: 18px;
+  margin-bottom: 16px;
+  background:
+    radial-gradient(500px 200px at 5% 0%, rgba(30, 155, 255, 0.2), transparent 70%),
+    radial-gradient(300px 220px at 98% 10%, rgba(19, 209, 127, 0.2), transparent 70%),
+    linear-gradient(180deg, var(--panel), var(--panel-2));
+}
+.hero-tag {
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #8dc9ff;
+  font-size: 12px;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+.home-hero h1 {
+  font-size: clamp(30px, 4.2vw, 54px);
+  line-height: 1.06;
+  margin: 0;
+  max-width: 760px;
+}
+.hero-copy { max-width: 740px; font-size: 16px; margin-top: 14px; }
+.hero-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.hero-side-card h3 { margin-top: 0; }
+
+.market-section { margin-top: 6px; }
+.market-head { display:flex; justify-content:space-between; gap: 8px; align-items:end; flex-wrap: wrap; }
+.market-head h2 { margin: 0; font-size: 28px; }
+.ticker-row {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+.ticker-tile {
+  border: 1px solid var(--line);
+  background: #0a1220;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+}
+.ticker-tile span { color: var(--muted); font-size: 12px; }
+.ticker-tile strong { font-size: 19px; }
+.market-table-wrap { margin-top: 12px; overflow-x: auto; }
+.status-pill {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid #2f7b5a;
+  color: #8bf0bf;
+  background: rgba(19, 209, 127, 0.12);
+  font-size: 12px;
+}
+.home-feature-grid { margin-top: 14px; }
+
+.card {
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+}
+.card-sub {
+  border: 1px solid var(--line);
+  background: #0a1220;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.kpis { display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.kpi { background:#0b1220; border:1px solid var(--line); border-radius: 10px; padding: 12px; }
+.kpi h4 { margin:0 0 6px; color:var(--muted); font-size: 12px; }
+.kpi p { margin:0; font-size: 20px; }
+
+.btn {
+  border: 1px solid var(--line);
+  background: #0d1728;
+  color: var(--text);
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+.btn-primary { background: var(--blue); color: #001326; border-color: #4ab2ff; font-weight: 700; }
+.btn-success { background: var(--green); color: #002015; border-color: #3ee39b; font-weight: 700; }
+.btn:disabled { opacity: .6; cursor:not-allowed; }
+
+.auth-wrap { min-height: calc(100vh - 72px); display:grid; place-items:center; padding: 20px; }
+.auth-card { width: min(460px, 100%); }
+.form-grid { display: grid; gap: 10px; }
+.input {
+  width:100%; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid var(--line); background:#08101d; color: var(--text);
+}
+.muted { color: var(--muted); }
+.error { color: #ff6b6b; }
+.table-wrap { overflow-x:auto; margin-top: 14px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { border:1px solid var(--line); padding: 8px; }
+th { text-align:left; background:#0b1321; }
+
+.dashboard-grid-two { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.compact-list { margin: 0; padding-left: 16px; display:grid; gap:4px; }
+
+.trade-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 14px;
+}
+.trade-stack { display:grid; gap: 12px; }
+
+@media (max-width: 980px) {
+  .hero, .feature-grid, .dashboard-grid-two, .trade-layout, .home-hero, .ticker-row { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: 1fr 1fr; }
+}
