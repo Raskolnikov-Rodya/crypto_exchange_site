@@ -102,6 +102,21 @@ Quick checks:
 If `/test-db` reports database unavailable, start PostgreSQL and verify `.env` `DATABASE_URL`.
 
 
+
+## Bootstrap an admin account
+
+The dashboard only shows the admin panel for users with role `admin`.
+After running migrations, bootstrap an admin user:
+
+```bash
+PYTHONPATH=backend python scripts/bootstrap_admin.py \
+  --email admin@example.com \
+  --password AdminPass123 \
+  --username admin
+```
+
+Then sign in with that account on `/login` and open `/dashboard`.
+
 ## Frontend pages and backend endpoint alignment
 
 Implemented pages and route wiring:
