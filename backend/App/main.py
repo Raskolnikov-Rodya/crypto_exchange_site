@@ -1,6 +1,7 @@
 import os
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +14,14 @@ app = FastAPI(
     title="Crypto Exchange API",
     description="Simplified centralized crypto exchange (pet project)",
     version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 limiter = AuthRateLimiter(
@@ -60,7 +69,11 @@ async def health_check() -> dict[str, str]:
 
 @app.get("/test-db")
 async def test_db_connection(db: AsyncSession = Depends(get_db)) -> dict[str, str | int]:
-    result = await db.execute(text("SELECT 1"))
+    try:
+        result = await db.execute(text("SELECT 1"))
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"Database unavailable: {exc.__class__.__name__}") from exc
+
     return {
         "status": "success",
         "db_response": result.scalar_one(),

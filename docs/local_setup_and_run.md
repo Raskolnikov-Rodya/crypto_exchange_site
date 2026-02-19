@@ -86,6 +86,19 @@ VITE_API_URL=http://localhost:8000/api/v1
 - Backend Swagger docs: `http://localhost:8000/docs`
 - API reference in repo: `docs/api_endpoints_reference.md`
 
+
+## Database prerequisite (important)
+
+Most API routes (login/register, wallet, trades, admin) need a running PostgreSQL instance matching `DATABASE_URL`.
+If Postgres is not running, those routes will fail (typically 500/503).
+
+Quick checks:
+
+- `GET http://localhost:8000/health` (app process is up)
+- `GET http://localhost:8000/test-db` (database connectivity)
+
+If `/test-db` reports database unavailable, start PostgreSQL and verify `.env` `DATABASE_URL`.
+
 ## What to test first
 
 1. Backend health: `GET http://localhost:8000/health`
@@ -176,3 +189,9 @@ Recommended path:
 3. Install optional requirements later only when you need those features.
 
 If you must install optional packages immediately, install Microsoft C++ Build Tools first.
+
+
+## Why `GET /api/v1` returns 404
+
+`/api/v1` is a router prefix, not a standalone endpoint.
+Use concrete routes such as `/api/v1/auth/register`, `/api/v1/auth/login`, `/api/v1/wallet/balances`, etc.
