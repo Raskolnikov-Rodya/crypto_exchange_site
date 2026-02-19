@@ -99,6 +99,31 @@ Quick checks:
 
 If `/test-db` reports database unavailable, start PostgreSQL and verify `.env` `DATABASE_URL`.
 
+
+## Frontend pages and backend endpoint alignment
+
+Implemented pages and route wiring:
+
+- `/login` -> `POST /api/v1/auth/login`, `GET /api/v1/auth/me`
+- `/signup` -> `POST /api/v1/auth/register`
+- `/dashboard` (user) -> wallet flows:
+  - `GET /api/v1/wallet/balances`
+  - `POST /api/v1/wallet/deposit`
+  - `POST /api/v1/wallet/withdraw/request`
+  - `GET /api/v1/wallet/withdraw/requests`
+- `/dashboard` (admin role) -> admin flows:
+  - `GET /api/v1/users/`
+  - `GET /api/v1/admin/transactions`
+  - `POST /api/v1/admin/credit`
+  - `GET /api/v1/admin/withdrawals`
+  - `POST /api/v1/admin/withdrawals/{id}/approve|reject|complete`
+- `/trade` -> trading flows:
+  - `POST /api/v1/trades/`
+  - `GET /api/v1/trades/`
+  - `GET /api/v1/trades/orderbook/{symbol}`
+
+If a page stays blank, clear localStorage key `ce_token` and hard refresh.
+
 ## What to test first
 
 1. Backend health: `GET http://localhost:8000/health`

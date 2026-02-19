@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext.jsx";
-import { adminApi, walletApi } from "../services/api";
+import { adminApi, usersApi, walletApi } from "../services/api";
 
 function UserPanel() {
   const [balances, setBalances] = useState([]);
   const [requests, setRequests] = useState([]);
+  const [deposit, setDeposit] = useState({ coin: "BTC", amount: "" });
   const [form, setForm] = useState({ coin: "BTC", amount: "", destination_address: "" });
   const [message, setMessage] = useState("");
 
@@ -16,8 +17,21 @@ function UserPanel() {
   };
 
   useEffect(() => {
-    load();
+    load().catch((err) => setMessage(err?.response?.data?.detail || "Failed to load wallet data"));
   }, []);
+
+  const submitDeposit = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    try {
+      await walletApi.deposit({ coin: deposit.coin, amount: Number(deposit.amount) });
+      setMessage("Deposit recorded.");
+      setDeposit({ coin: "BTC", amount: "" });
+      await load();
+    } catch (err) {
+      setMessage(err?.response?.data?.detail || "Deposit failed");
+    }
+  };
 
   const requestWithdrawal = async (e) => {
     e.preventDefault();
@@ -44,6 +58,13 @@ function UserPanel() {
           <li key={b.coin}>{b.coin}: {b.amount}</li>
         ))}
       </ul>
+
+      <h3>Record deposit</h3>
+      <form onSubmit={submitDeposit} style={{ display: "grid", gap: 8, maxWidth: 440 }}>
+        <input value={deposit.coin} onChange={(e) => setDeposit({ ...deposit, coin: e.target.value.toUpperCase() })} placeholder="Coin (BTC)" required />
+        <input value={deposit.amount} onChange={(e) => setDeposit({ ...deposit, amount: e.target.value })} type="number" step="any" placeholder="Amount" required />
+        <button type="submit">Record deposit</button>
+      </form>
 
       <h3>Request withdrawal</h3>
       <form onSubmit={requestWithdrawal} style={{ display: "grid", gap: 8, maxWidth: 440 }}>
@@ -73,16 +94,20 @@ function UserPanel() {
 
 function AdminPanel() {
   const [queue, setQueue] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [credit, setCredit] = useState({ user_id: "", coin: "BTC", amount: "" });
   const [msg, setMsg] = useState("");
 
   const load = async () => {
-    const { data } = await adminApi.withdrawals();
-    setQueue(data);
+    const [queueRes, usersRes, txRes] = await Promise.all([adminApi.withdrawals(), usersApi.list(), adminApi.transactions()]);
+    setQueue(queueRes.data);
+    setUsers(usersRes.data);
+    setTransactions(txRes.data);
   };
 
   useEffect(() => {
-    load();
+    load().catch((err) => setMsg(err?.response?.data?.detail || "Failed to load admin data"));
   }, []);
 
   const action = async (id, type) => {
@@ -103,6 +128,7 @@ function AdminPanel() {
       await adminApi.credit({ user_id: Number(credit.user_id), coin: credit.coin, amount: Number(credit.amount) });
       setMsg("Manual credit successful");
       setCredit({ user_id: "", coin: "BTC", amount: "" });
+      await load();
     } catch (err) {
       setMsg(err?.response?.data?.detail || "Credit failed");
     }
@@ -119,6 +145,13 @@ function AdminPanel() {
       </form>
       {msg && <p>{msg}</p>}
 
+      <h3>Users</h3>
+      <ul>
+        {users.map((u) => (
+          <li key={u.id}>{u.id}: {u.email} ({u.role})</li>
+        ))}
+      </ul>
+
       <h3>Withdrawal queue</h3>
       <table border="1" cellPadding="8" style={{ borderCollapse: "collapse" }}>
         <thead>
@@ -133,6 +166,20 @@ function AdminPanel() {
                 <button disabled={r.status !== "pending"} onClick={() => action(r.id, "reject")}>Reject</button>
                 <button disabled={r.status !== "approved"} onClick={() => action(r.id, "complete")}>Complete</button>
               </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h3>Recent transactions</h3>
+      <table border="1" cellPadding="8" style={{ borderCollapse: "collapse" }}>
+        <thead>
+          <tr><th>ID</th><th>User</th><th>Coin</th><th>Amount</th><th>Type</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          {transactions.slice(0, 20).map((t) => (
+            <tr key={t.id}>
+              <td>{t.id}</td><td>{t.user_id}</td><td>{t.coin}</td><td>{t.amount}</td><td>{t.type}</td><td>{t.status}</td>
             </tr>
           ))}
         </tbody>

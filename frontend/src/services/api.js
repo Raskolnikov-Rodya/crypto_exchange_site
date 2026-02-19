@@ -27,6 +27,10 @@ export const authApi = {
   me: () => api.get("/auth/me"),
 };
 
+export const usersApi = {
+  list: () => api.get("/users/"),
+};
+
 export const walletApi = {
   balances: () => api.get("/wallet/balances"),
   deposit: (payload) => api.post("/wallet/deposit", payload),
@@ -34,7 +38,15 @@ export const walletApi = {
   myWithdrawals: () => api.get("/wallet/withdraw/requests"),
 };
 
+export const tradesApi = {
+  placeOrder: (payload) => api.post("/trades/", payload),
+  myOrders: () => api.get("/trades/"),
+  orderbook: (symbol) => api.get(`/trades/orderbook/${symbol}`),
+  runMatching: (symbol) => api.post(`/trades/match/${symbol}`),
+};
+
 export const adminApi = {
+  transactions: () => api.get("/admin/transactions"),
   credit: (payload) => api.post("/admin/credit", payload),
   withdrawals: () => api.get("/admin/withdrawals"),
   approveWithdrawal: (id, payload = {}) => api.post(`/admin/withdrawals/${id}/approve`, payload),
