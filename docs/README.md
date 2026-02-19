@@ -45,3 +45,4 @@ See /docs/ for detailed specs.
 - Optional backend dependencies: `backend/requirements-optional.txt`
 
 - API endpoint map: `docs/api_endpoints_reference.md`
+- `production_readiness_plan.md` — pragmatic 1–2 week plan and go/no-go criteria for production rollout.

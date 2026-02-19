@@ -141,6 +141,17 @@ Implemented pages and route wiring:
 
 If a page stays blank, clear localStorage key `ce_token` and hard refresh.
 
+
+## Production preflight command
+
+Before a release candidate deployment, run:
+
+```bash
+bash scripts/prod_preflight.sh
+```
+
+This runs compile checks, backend tests, conditional API flow smoke tests, frontend build, and repo-state verification in one command.
+
 ## What to test first
 
 1. Backend health: `GET http://localhost:8000/health`
