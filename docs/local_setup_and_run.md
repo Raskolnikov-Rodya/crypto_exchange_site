@@ -166,6 +166,23 @@ This runs compile checks, backend tests, conditional API flow smoke tests, front
 - Installing frontend dependencies but not backend dependencies (or vice versa).
 
 
+
+## Troubleshooting: `column users.username does not exist`
+
+If login/register returns 500 and backend logs show:
+
+```text
+column users.username does not exist
+```
+
+then your database is behind the current schema version. Run migrations from `backend/`:
+
+```bash
+alembic upgrade head
+```
+
+Then restart the API process.
+
 ## Troubleshooting: `pg_config executable not found`
 
 If `pip install -r backend/requirements.txt` fails with:
