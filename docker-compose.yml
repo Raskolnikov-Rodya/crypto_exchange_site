@@ -1,5 +1,3 @@
-
-
 services:
   db:
     image: postgres:16-alpine
@@ -12,6 +10,21 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: 
+      context: ./backend
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    environment:
+      - PYTHONPATH=/app
+      - DB_HOST=db
+      - DB_NAME=crypto_exchange
+      - DB_USER=postgres
+      - DB_PASS=postgres
+    depends_on:
+      - db
 
 volumes:
   postgres_data:
