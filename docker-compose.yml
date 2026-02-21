@@ -12,19 +12,18 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   backend:
-    build: 
+    build:
       context: ./backend
-    volumes:
-      - ./backend:/app
-    working_dir: /app
-    environment:
-      - PYTHONPATH=/app
-      - DB_HOST=db
-      - DB_NAME=crypto_exchange
-      - DB_USER=postgres
-      - DB_PASS=postgres
+      dockerfile: Dockerfile
+    restart: always
     depends_on:
       - db
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/crypto_exchange
+      ENV: development
+    ports:
+      - "8000:8000"
+    command: ["python", "run_api.py"]
 
 volumes:
   postgres_data:

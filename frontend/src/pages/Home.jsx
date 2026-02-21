@@ -117,24 +117,65 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="get-started home-section card">
+      <section className="trust-section home-section">
+        <div className="trust-left">
+          <p className="trust-tag">TRUSTED & SECURE</p>
+          <h2>
+            <strong>The highest standards</strong> across custody, security & compliance of any crypto investment platform
+          </h2>
+          <Link to="/signup" className="trust-link">Learn how you’re safe with H-E-R-M-A-R →</Link>
+        </div>
+        <div className="trust-right">
+          <article>
+            <h3>Secure custody</h3>
+            <p>We secure your assets using the safest protocols and practices implemented by dedicated cybersecurity experts.</p>
+          </article>
+          <article>
+            <h3>Layered security</h3>
+            <p>We use multiple layers of protection to keep your account, funds and personal data as safe as possible.</p>
+          </article>
+          <article>
+            <h3>Compliance</h3>
+            <p>We comply with regulatory standards to keep you and H-E-R-M-A-R on the right side of the law.</p>
+          </article>
+        </div>
+      </section>
+
+      <section className="earn-section home-section">
+        <p className="hero-tag">Rewards</p>
+        <h2><strong>Earn</strong> with H-E-R-M-A-R</h2>
+        <div className="earn-grid">
+          <article>
+            <h3>Referral commissions</h3>
+            <p>Benefit from high commissions and earn lifetime rewards as you refer more traders to our platform.</p>
+            <Link to="/signup">Discover our referral program →</Link>
+          </article>
+          <article>
+            <h3>Maker rewards</h3>
+            <p>Anyone can earn from adding liquidity to our order books, when your orders get filled, you get paid.</p>
+            <Link to="/trade">Start earning liquidity rewards →</Link>
+          </article>
+        </div>
+      </section>
+
+      <section className="get-started home-section">
         <p className="hero-tag">Quickly start trading</p>
-        <h2>Get started in minutes</h2>
+        <h2>Get started in one minute</h2>
         <div className="steps-grid">
           <article className="step-card">
             <span>01</span>
-            <h3>Create your account</h3>
-            <p className="muted">Sign up with your email, choose a strong password and verify your profile details.</p>
+            <h3>Open account</h3>
+            <p className="muted">Create and verify your account in minutes.</p>
           </article>
           <article className="step-card">
             <span>02</span>
-            <h3>Fund your wallet</h3>
-            <p className="muted">Deposit crypto and monitor wallet balances from your personal dashboard.</p>
+            <h3>Fund your account</h3>
+            <p className="muted">Deposit fiat by bank transfer or directly deposit crypto to fund your account.</p>
           </article>
           <article className="step-card">
             <span>03</span>
             <h3>Start trading</h3>
-            <p className="muted">Place buy/sell orders and track prices with clean exchange-style market views.</p>
+            <p className="muted">Trade 100+ crypto assets across spot and margin with a clean professional interface.</p>
           </article>
         </div>
       </section>
