@@ -3,6 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext.jsx";
 import BrandLogo from "./BrandLogo.jsx";
 
+function accountHolderName(user) {
+  if (user?.username && user.username.trim().length > 0) return user.username.trim();
+  if (user?.email && user.email.includes("@")) return user.email.split("@")[0];
+  return "Account";
+}
+
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -23,7 +29,10 @@ export default function Navbar() {
       <div className="nav-right">
         {user ? (
           <>
-            <span className="muted">{user.email} ({user.role})</span>
+            <div className="user-badge">
+              <strong>{accountHolderName(user)} ({user.role})</strong>
+              <span>{user.username ? `@${user.username}` : user.email}</span>
+            </div>
             <button className="btn" onClick={onLogout}>Logout</button>
           </>
         ) : (

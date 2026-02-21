@@ -34,6 +34,20 @@ a { color: var(--text); text-decoration: none; }
   z-index: 5;
 }
 .nav-links, .nav-right { display: flex; gap: 12px; align-items: center; }
+.user-badge {
+  display: grid;
+  gap: 2px;
+  text-align: right;
+}
+.user-badge strong {
+  font-size: 14px;
+  color: var(--text);
+}
+.user-badge span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
 .nav-pill { padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; }
 .nav-pill:hover { border-color: var(--blue); }
 
