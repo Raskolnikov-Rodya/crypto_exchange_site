@@ -117,6 +117,21 @@ PYTHONPATH=backend python scripts/bootstrap_admin.py \
 
 Then sign in with that account on `/login` and open `/dashboard`.
 
+## Docker: promote a user to admin
+
+After your containers are up, you can promote/create an admin from inside the backend container:
+
+```bash
+docker compose exec backend \
+  env PYTHONPATH=/app/backend \
+  python /app/scripts/bootstrap_admin.py \
+  --email admin@example.com \
+  --password AdminPass123 \
+  --username admin
+```
+
+Then sign in with that account and open `/dashboard` to access admin controls.
+
 ## Frontend pages and backend endpoint alignment
 
 Implemented pages and route wiring:

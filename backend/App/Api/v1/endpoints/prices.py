@@ -10,6 +10,9 @@ COIN_MAP = {
     "LTC": "litecoin",
     "BCH": "bitcoin-cash",
     "USDT": "tether",
+    "SOL": "solana",
+    "XRP": "ripple",
+    "ADA": "cardano",
 }
 
 

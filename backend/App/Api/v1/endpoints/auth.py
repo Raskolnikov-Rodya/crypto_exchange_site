@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sqlalchemy import or_, select
+from sqlalchemy import or_, select, text
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,17 +15,30 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 MIGRATION_HINT = "Database schema is out of date. Run: alembic upgrade head"
 
 
-def _raise_if_users_profile_column_missing(exc: ProgrammingError) -> None:
+def _is_users_profile_column_error(exc: ProgrammingError) -> bool:
     message = str(getattr(exc, "orig", exc)).lower()
-    if "column users.username does not exist" in message or "column users.phone does not exist" in message:
-        raise HTTPException(status_code=503, detail=MIGRATION_HINT) from exc
+    return "column users.username does not exist" in message or "column users.phone does not exist" in message
+
+
+async def _self_heal_user_profile_columns(db: AsyncSession) -> None:
+    # Safety net for environments where migrations were skipped.
+    await db.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(50)"))
+    await db.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(25)"))
+    await db.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_username ON users (username)"))
+    await db.commit()
 
 
 async def _safe_execute(db: AsyncSession, statement):
     try:
         return await db.execute(statement)
     except ProgrammingError as exc:
-        _raise_if_users_profile_column_missing(exc)
+        if _is_users_profile_column_error(exc):
+            try:
+                await db.rollback()
+                await _self_heal_user_profile_columns(db)
+                return await db.execute(statement)
+            except Exception as heal_exc:  # noqa: BLE001 - we convert to actionable API error
+                raise HTTPException(status_code=503, detail=MIGRATION_HINT) from heal_exc
         raise
 
 
@@ -33,7 +46,14 @@ async def _safe_commit(db: AsyncSession) -> None:
     try:
         await db.commit()
     except ProgrammingError as exc:
-        _raise_if_users_profile_column_missing(exc)
+        if _is_users_profile_column_error(exc):
+            try:
+                await db.rollback()
+                await _self_heal_user_profile_columns(db)
+                await db.commit()
+                return
+            except Exception as heal_exc:  # noqa: BLE001 - we convert to actionable API error
+                raise HTTPException(status_code=503, detail=MIGRATION_HINT) from heal_exc
         raise
 
 
